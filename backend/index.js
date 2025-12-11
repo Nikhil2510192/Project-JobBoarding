@@ -1,0 +1,76 @@
+// index.js (Integrated Express and Socket.IO Server)
+
+import { app } from "./Middlewares/app.js";
+import dotenv from "dotenv";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
+
+dotenv.config();
+
+const PORT = process.env.PORT || 8000;
+
+// 1. Setup Combined HTTP/WS Server
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: process.env.FRONTEND_URL || "http://localhost:3000",
+        methods: ["GET", "POST"],
+        credentials: true
+    }
+});
+
+// Store connected users for direct addressing
+const connectedUsers = new Map();
+
+// 2. Authentication Middleware
+io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    
+    if (!token) {
+        return next(new Error("Auth Error: No token provided"));
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        socket.userId = decoded.userId;
+        socket.userType = decoded.userType || "user";
+        next();
+    } catch (err) {
+        return next(new Error("Auth Error: Invalid token"));
+    }
+});
+
+// 3. WebSocket Connection Handler
+io.on("connection", (socket) => {
+    console.log(`🔌 User ${socket.userId} (${socket.userType}) connected`);
+    
+    // Store active connection
+    connectedUsers.set(socket.userId, socket.id);
+    
+    // Join personal room for targeted notifications
+    socket.join(`user_${socket.userId}`);
+    
+    // Join specific type room (e.g., for broadcast messages to all companies)
+    if (socket.userType === "company") {
+        socket.join("all_companies");
+    }
+    
+    // Disconnection logic
+    socket.on("disconnect", () => {
+        console.log(`🔌 User ${socket.userId} disconnected`);
+        connectedUsers.delete(socket.userId);
+    });
+});
+
+// 4. Global Access and Export
+// Attaching to 'app' allows your Express controllers to access the Socket.IO instance
+app.set("io", io); 
+
+// Start the server (listening on the HTTP server which includes Express and Socket.IO)
+httpServer.listen(PORT, () => {
+    console.log(`✅ Server is running on: http://localhost:${PORT}`);
+});
+
+// Optional: Export for use in other modules
+export { io, connectedUsers };

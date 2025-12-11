@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+  engineType = "binary"
+}
+
+// (Removed extra generator) Using `engineType = "binary"` above for `generator client`.
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               Int        @id @default(autoincrement())
+  name             String
+  email            String     @unique
+  password         String
+  role             String?
+  otherRoles       Json?
+  bio              String?
+  portfolioSite    String?
+  linkedIn         String?
+  github           String?
+
+  // Work experience
+  experience       Int?
+  company          String?
+  position         String?
+  currentlyWorking Json?
+  description      String?
+
+  // Education
+  education        String?
+  college          String?
+  fieldOfStudy     String?
+
+  // Skills as JSON array/object
+  skills           Json?
+
+  // Interview preference
+  openToInterview  Json?      @default("{\"status\": \"yes\"}")
+
+  // Relationships
+  appliedJobs      Job[]      @relation("AppliedJobs")
+  shortlistedJobs  Job[]      @relation("ShortlistedJobs")
+  resumes          Resume[]
+
+  created_at       DateTime   @default(now())
+}
+
+model Resume {
+  id            Int   @id @default(autoincrement())
+  user_id       Int
+  user          User  @relation(fields: [user_id], references: [id])
+
+  resumeUrl     String   // Cloudinary public URL (frontend uses this)
+  cloudinaryId  String   // Needed to delete from Cloudinary ("resume_uploads/xxxx")
+
+  resumeText    String?  // Extracted text (null until processed)
+  resumeScore   Int?     // Future AI scoring
+  good          String?  // "Strengths" extracted by AI
+  improve       String?  // "Weak points" feedback
+}
+
+model Job {
+  id               Int      @id @default(autoincrement())
+  salary           Int
+  role             String
+  skills           Json
+  number           Int
+  experience       Int
+  deadLine         DateTime
+
+  // Users who applied to this job (many-to-many)
+  usersApplied     User[]   @relation("AppliedJobs")
+
+  // Users shortlisted for this job (many-to-many)
+  usersShortlisted User[]   @relation("ShortlistedJobs")
+
+  companyId        Int
+  company          Company  @relation(fields: [companyId], references: [id])
+  created_at       DateTime   @default(now())
+}
+
+model Company {
+  id           Int     @id @default(autoincrement())
+  name         String?
+  email        String?
+  password     String?
+  description  String
+  website      String
+  location     String
+  jobs         Job[]
+}
