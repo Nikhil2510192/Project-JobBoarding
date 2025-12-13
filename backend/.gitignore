@@ -1,0 +1,49 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Prisma
+prisma/migrations/
+# (If you want migrations tracked, remove the line above)
+
+# Logs
+logs
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# OS/System Files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/
+.cache/
+coverage/
+
+# Next.js / React build outputs (if applicable)
+.next/
+out/
+*.map
+
+# TypeScript
+*.tsbuildinfo
+Readme.md
+
