@@ -7,12 +7,19 @@ import jwt from 'jsonwebtoken'
 
 export const createUser = async (req, res) => {
     try{
+      console.log("BODY:", req.body);
+      console.log("METHOD:", req.method);
+  console.log("HEADERS:", req.headers["content-type"]);
+  console.log("BODY:", req.body);
   const { name, email, password } = req.body;
   console.log("Received data:", {name, email, password });
   if (!name || !email || !password) {
             console.log("Validation failed: Missing required fields.");
             return res.status(400).send({ "message": "All Fields are required" });
         }
+        await prisma.$queryRaw`SELECT current_user, current_database()`;
+console.log("DB access OK");
+
   const findUser = await prisma.user.findUnique({
     where: {
       email: email,
@@ -36,7 +43,7 @@ export const createUser = async (req, res) => {
     },
   });
 const token = jwt.sign(
-        { id: user.id, type: "user" }, 
+        { id: newUser.id, type: "user" }, 
         process.env.JWT_SECRET, 
         { expiresIn: "7d" }
         );
@@ -53,7 +60,7 @@ res.cookie('token', token, {
     console.error("Error creating user:", error);
     return res.status(500).json({ status: 500, message: "Internal Server Error" });
 }}
-
+//completed
 
 
 
@@ -297,7 +304,7 @@ export const getAppliedJobs = async (req, res) => {
         id: true,
         role: true,
         salary: true,
-        deadline: true,   // added
+        deadLine: true,   // added
         company: { select: { id: true, name: true } }
       }
     }
@@ -310,7 +317,7 @@ export const getAppliedJobs = async (req, res) => {
   jobId: job.id,
   role: job.role,
   salary: job.salary,
-  deadline: job.deadline,
+  deadLine: job.deadline,
   company: job.company
 }));
     return res.status(200).json({

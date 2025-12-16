@@ -1,6 +1,6 @@
 // index.js (Integrated Express and Socket.IO Server)
 
-import { app } from "./Middlewares/app.js";
+import app from "./Middlewares/app.js";
 import dotenv from "dotenv";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -12,6 +12,8 @@ import  prisma  from './db.config.js';
 dotenv.config();
 
 const PORT = process.env.PORT || 8000;
+
+
 
 // 1. Setup Combined HTTP/WS Server
 const httpServer = createServer(app);
@@ -36,8 +38,8 @@ io.use((socket, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        socket.userId = decoded.userId;
-        socket.userType = decoded.userType || "user";
+        socket.userId = decoded.id;
+        socket.userType = decoded.type || "user";
         next();
     } catch (err) {
         return next(new Error("Auth Error: Invalid token"));
