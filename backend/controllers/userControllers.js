@@ -4,22 +4,14 @@ import jwt from 'jsonwebtoken'
 
 
 
-
 export const createUser = async (req, res) => {
     try{
-      console.log("BODY:", req.body);
-      console.log("METHOD:", req.method);
-  console.log("HEADERS:", req.headers["content-type"]);
-  console.log("BODY:", req.body);
   const { name, email, password } = req.body;
   console.log("Received data:", {name, email, password });
   if (!name || !email || !password) {
             console.log("Validation failed: Missing required fields.");
             return res.status(400).send({ "message": "All Fields are required" });
         }
-        await prisma.$queryRaw`SELECT current_user, current_database()`;
-console.log("DB access OK");
-
   const findUser = await prisma.user.findUnique({
     where: {
       email: email,
@@ -48,7 +40,7 @@ const token = jwt.sign(
         { expiresIn: "7d" }
         );
 res.cookie('token', token, {
-            httpOnly: process.env.NODE_ENV === 'production',
+            httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000  // 7 days
@@ -105,7 +97,7 @@ try {
    );
 
         res.cookie('token', token, {
-            httpOnly: process.env.NODE_ENV === 'production',
+            httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000
@@ -132,7 +124,7 @@ try {
         }
 
         res.clearCookie('token', {
-            httpOnly: process.env.NODE_ENV === 'production',
+            httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
         });
