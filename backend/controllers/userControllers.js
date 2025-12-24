@@ -4,7 +4,10 @@ import jwt from 'jsonwebtoken'
 
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> frontendv1
 export const createUser = async (req, res) => {
     try{
   const { name, email, password } = req.body;
@@ -36,6 +39,7 @@ export const createUser = async (req, res) => {
     },
   });
 const token = jwt.sign(
+<<<<<<< HEAD
         { id: user.id, type: "user" }, 
         process.env.JWT_SECRET, 
         { expiresIn: "7d" }
@@ -46,6 +50,17 @@ res.cookie('token', token, {
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000  // 7 days
         });
+=======
+        { id: newUser.id, type: "user" }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: "7d" }
+        );
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+});
+>>>>>>> frontendv1
  console.log("User created successfully:", newUser);
  return res.json({ status: 200, msg: "User created." });
 }
@@ -53,7 +68,11 @@ res.cookie('token', token, {
     console.error("Error creating user:", error);
     return res.status(500).json({ status: 500, message: "Internal Server Error" });
 }}
+<<<<<<< HEAD
 
+=======
+//completed
+>>>>>>> frontendv1
 
 
 
@@ -97,12 +116,20 @@ try {
   { expiresIn: "7d" }
    );
 
+<<<<<<< HEAD
         res.cookie('token', token, {
             httpOnly: process.env.NODE_ENV === 'production',
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
+=======
+        res.cookie("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+});
+>>>>>>> frontendv1
     console.log('user signed in');
     res.json({ message: 'Login Successfull' });
   } catch (err) {
@@ -125,7 +152,11 @@ try {
         }
 
         res.clearCookie('token', {
+<<<<<<< HEAD
             httpOnly: process.env.NODE_ENV === 'production',
+=======
+            httpOnly: true,
+>>>>>>> frontendv1
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
         });
@@ -297,7 +328,11 @@ export const getAppliedJobs = async (req, res) => {
         id: true,
         role: true,
         salary: true,
+<<<<<<< HEAD
         deadline: true,   // added
+=======
+        deadLine: true,   // added
+>>>>>>> frontendv1
         company: { select: { id: true, name: true } }
       }
     }
@@ -310,7 +345,11 @@ export const getAppliedJobs = async (req, res) => {
   jobId: job.id,
   role: job.role,
   salary: job.salary,
+<<<<<<< HEAD
   deadline: job.deadline,
+=======
+  deadLine: job.deadline,
+>>>>>>> frontendv1
   company: job.company
 }));
     return res.status(200).json({
