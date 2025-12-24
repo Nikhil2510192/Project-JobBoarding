@@ -4,10 +4,6 @@ import jwt from 'jsonwebtoken'
 
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> frontendv1
 export const createUser = async (req, res) => {
     try{
   const { name, email, password } = req.body;
@@ -39,28 +35,18 @@ export const createUser = async (req, res) => {
     },
   });
 const token = jwt.sign(
-<<<<<<< HEAD
-        { id: user.id, type: "user" }, 
-        process.env.JWT_SECRET, 
-        { expiresIn: "7d" }
-        );
-res.cookie('token', token, {
-            httpOnly: process.env.NODE_ENV === 'production',
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000  // 7 days
-        });
-=======
         { id: newUser.id, type: "user" }, 
         process.env.JWT_SECRET, 
         { expiresIn: "7d" }
         );
-res.cookie("token", token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-});
->>>>>>> frontendv1
+
+        res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+
  console.log("User created successfully:", newUser);
  return res.json({ status: 200, msg: "User created." });
 }
@@ -68,11 +54,7 @@ res.cookie("token", token, {
     console.error("Error creating user:", error);
     return res.status(500).json({ status: 500, message: "Internal Server Error" });
 }}
-<<<<<<< HEAD
-
-=======
 //completed
->>>>>>> frontendv1
 
 
 
@@ -88,7 +70,6 @@ res.cookie("token", token, {
 export const login= async (req, res) => {
 try {
   const { email, password } = req.body;
-
   if (!email || !password) {
     console.log("Validation failed: Missing email or password.");
     return res
@@ -98,7 +79,6 @@ try {
     const user = await prisma.user.findUnique({
       where: { email }
     });
-
     if (!user) {
       console.log('User not found:', email);
       return res.status(400).json({ error: 'user not found' });
@@ -109,27 +89,18 @@ try {
       console.log('Invalid password for user:', email);
       return res.status(400).json({ error: 'Invalid password' });
     }
-
     const token = jwt.sign(
   { id: user.id, type: "user" }, 
   process.env.JWT_SECRET, 
   { expiresIn: "7d" }
    );
-
-<<<<<<< HEAD
-        res.cookie('token', token, {
-            httpOnly: process.env.NODE_ENV === 'production',
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        });
-=======
         res.cookie("token", token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-});
->>>>>>> frontendv1
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+
     console.log('user signed in');
     res.json({ message: 'Login Successfull' });
   } catch (err) {
@@ -151,15 +122,11 @@ try {
             return res.status(400).send({ "message": "No cookie is present" });
         }
 
-        res.clearCookie('token', {
-<<<<<<< HEAD
-            httpOnly: process.env.NODE_ENV === 'production',
-=======
-            httpOnly: true,
->>>>>>> frontendv1
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        });
+       res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      });
 
         return res.status(200).send({ "message": "Logout successful" });
     } catch (error) {
@@ -200,16 +167,13 @@ export const UserProfile = async (req, res) => {
       otherRoles,
       openToInterview // <-- newly added
     } = req.body;
-
     // Check existing user
     const user = await prisma.user.findUnique({
       where: { id: userId }
     });
-
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
     // Build dynamic update object
     const updateData = {};
 
@@ -244,7 +208,6 @@ export const UserProfile = async (req, res) => {
       message: "User profile updated successfully",
       user: updatedUser
     });
-
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error", error });
@@ -264,7 +227,6 @@ export const getUser = async (req, res) => {
     if (isNaN(userId)) {
       return res.status(400).json({ message: "Invalid user ID" });
     }
-
     const user = await prisma.user.findUnique({
       where: { id: userId },
       // avoid returning password in response
@@ -297,7 +259,6 @@ export const getUser = async (req, res) => {
       message: "User retrieved successfully",
       user
     });
-
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -328,11 +289,7 @@ export const getAppliedJobs = async (req, res) => {
         id: true,
         role: true,
         salary: true,
-<<<<<<< HEAD
-        deadline: true,   // added
-=======
         deadLine: true,   // added
->>>>>>> frontendv1
         company: { select: { id: true, name: true } }
       }
     }
@@ -345,11 +302,7 @@ export const getAppliedJobs = async (req, res) => {
   jobId: job.id,
   role: job.role,
   salary: job.salary,
-<<<<<<< HEAD
-  deadline: job.deadline,
-=======
-  deadLine: job.deadline,
->>>>>>> frontendv1
+  deadLine: job.deadLine,
   company: job.company
 }));
     return res.status(200).json({
@@ -400,7 +353,7 @@ export const getDiscoverJobs = async (req, res) => {
         id: true,
         role: true,
         salary: true,
-        deadline: true,
+        deadLine: true,
         company: { select: { id: true, name: true } }
       }
     });
@@ -410,7 +363,7 @@ export const getDiscoverJobs = async (req, res) => {
       jobId: job.id,
       role: job.role,
       salary: job.salary,
-      deadline: job.deadline,
+      deadLine: job.deadLine,
       company: job.company
     }));
 
