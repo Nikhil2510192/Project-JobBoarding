@@ -50,7 +50,8 @@ const Login = () => {
       }
 
       if (userType === "user") {
-        navigate("/user/home");
+        // Always start user onboarding after login
+        navigate("/user/dashboard/profile");
       } else {
         navigate("/company/dashboard");
       }

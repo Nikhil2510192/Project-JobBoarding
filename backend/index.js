@@ -1,108 +1,104 @@
-// backend/index.js
-// Integrated Express + Socket.IO Server (FIXED)
+// index.js (Integrated Express and Socket.IO Server)
 
-import { app } from "./Middlewares/app.js";
+import app from "./Middlewares/app.js";
 import dotenv from "dotenv";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
-import prisma from "./db.config.js";
+
+// ⭐ ADDED — to fetch saved notifications
+import  prisma  from './db.config.js';
 
 dotenv.config();
 
 const PORT = process.env.PORT || 8000;
 
-// 1. Create HTTP server
-const httpServer = createServer(app);
 
-// 2. Create Socket.IO server
+
+// 1. Setup Combined HTTP/WS Server
+const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: {
-    origin: ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"],
-    methods: ["GET", "POST"],
-    credentials: true
-  }
+    cors: {
+        origin: process.env.FRONTEND_URL || "http://localhost:8080",
+        methods: ["GET", "POST"],
+        credentials: true
+    }
 });
 
-// Track connected users
+// Store connected users for direct addressing
 const connectedUsers = new Map();
 
-// 3. Socket Authentication Middleware ✅ FIXED
+// 2. Authentication Middleware
 io.use((socket, next) => {
-  const token = socket.handshake.auth?.token;
+    const token = socket.handshake.auth.token;
+    
+    if (!token) {
+        return next(new Error("Auth Error: No token provided"));
+    }
 
-  if (!token) {
-    return next(new Error("Auth Error: No token provided"));
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // 🔥 FIX: match JWT payload
-    socket.userId = decoded.id;
-    socket.userType = decoded.type || "user";
-
-    next();
-  } catch (err) {
-    return next(new Error("Auth Error: Invalid token"));
-  }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        socket.userId = decoded.id;
+        socket.userType = decoded.type || "user";
+        next();
+    } catch (err) {
+        return next(new Error("Auth Error: Invalid token"));
+    }
 });
 
-// 4. Socket Connection Handler
-io.on("connection", async (socket) => {
-  console.log(`🔌 User ${socket.userId} (${socket.userType}) connected`);
+// 3. WebSocket Connection Handler
+io.on("connection", async (socket) => {   // ⭐ CHANGED → made async
+    console.log(`🔌 User ${socket.userId} (${socket.userType}) connected`);
+    
+    // Store active connection
+    connectedUsers.set(socket.userId, socket.id);
+    
+    // Join personal room for targeted notifications
+    socket.join(`user_${socket.userId}`);
+    
+    // Join specific type room (e.g., for broadcast messages to all companies)
+    if (socket.userType === "company") {
+        socket.join("all_companies");
+    }
 
-  connectedUsers.set(socket.userId, socket.id);
+    // ⭐⭐⭐ ADDED — Deliver pending notifications (offline → now online)
+    try {
+        const pending = await prisma.notification.findMany({
+            where: { userId: Number(socket.userId), delivered: false }
+        });
 
-  // Personal room
-  socket.join(`user_${socket.userId}`);
+        if (pending.length > 0) {
+            console.log(`📨 Delivering ${pending.length} pending notifications to user_${socket.userId}`);
 
-  // Company broadcast room
-  if (socket.userType === "company") {
-    socket.join("all_companies");
-  }
+            for (const n of pending) {
+                socket.emit(n.type, n.data);
+            }
 
-  // Deliver pending notifications
-  try {
-    const pending = await prisma.notification.findMany({
-      where: {
-        userId: Number(socket.userId),
-        delivered: false
-      }
+            await prisma.notification.updateMany({
+                where: { userId: Number(socket.userId), delivered: false },
+                data: { delivered: true },
+            });
+        }
+    } catch (err) {
+        console.error("⚠ Error sending pending notifications:", err);
+    }
+    // ⭐⭐⭐ END OF ADDED BLOCK
+
+    // Disconnection logic
+    socket.on("disconnect", () => {
+        console.log(`🔌 User ${socket.userId} disconnected`);
+        connectedUsers.delete(socket.userId);
     });
-
-    for (const n of pending) {
-      socket.emit(n.type, n.data);
-    }
-
-    if (pending.length > 0) {
-      await prisma.notification.updateMany({
-        where: {
-          userId: Number(socket.userId),
-          delivered: false
-        },
-        data: { delivered: true }
-      });
-
-      console.log(`📨 Delivered ${pending.length} pending notifications`);
-    }
-  } catch (err) {
-    console.error("⚠ Notification delivery error:", err);
-  }
-
-  socket.on("disconnect", () => {
-    console.log(`🔌 User ${socket.userId} disconnected`);
-    connectedUsers.delete(socket.userId);
-  });
 });
 
-// 5. Make io available to Express
-app.set("io", io);
+// 4. Global Access and Export
+// Attaching to 'app' allows your Express controllers to access the Socket.IO instance
+app.set("io", io); 
 
-// 6. Start server
+// Start the server (listening on the HTTP server which includes Express and Socket.IO)
 httpServer.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+    console.log(`✅ Server is running on: http://localhost:${PORT}`);
 });
 
-// Optional exports
+// Optional: Export for use in other modules
 export { io, connectedUsers };

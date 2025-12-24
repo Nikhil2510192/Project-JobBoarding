@@ -1,8 +1,11 @@
+import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import RequireOnboarding from "@/components/RequireOnboarding";
+import OnboardingLayout from "@/components/layouts/OnboardingLayout";
 
 // Auth Pages
 import Welcome from "./pages/Welcome";
@@ -34,10 +37,11 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Welcome />} />
@@ -46,14 +50,46 @@ const App = () => (
           <Route path="/signup/company" element={<CompanySignup />} />
           <Route path="/login" element={<Login />} />
 
-          {/* User Routes */}
+          {/* Onboarding Routes (Top bar with only Logout, no sidebar) */}
+          <Route element={<OnboardingLayout />}>
+            <Route path="/user/dashboard/profile" element={<UserDashboardProfile />} />
+            <Route path="/user/dashboard/resume" element={<UserDashboardResume />} />
+          </Route>
+
+          {/* User Protected Routes */}
           <Route path="/user" element={<UserLayout />}>
-            <Route path="dashboard/profile" element={<UserDashboardProfile />} />
-            <Route path="dashboard/resume" element={<UserDashboardResume />} />
-            <Route path="home" element={<UserHome />} />
-            <Route path="insights" element={<UserInsights />} />
-            <Route path="messages" element={<UserMessages />} />
-            <Route path="discover" element={<UserDiscover />} />
+            <Route
+              path="home"
+              element={
+                <RequireOnboarding>
+                  <UserHome />
+                </RequireOnboarding>
+              }
+            />
+            <Route
+              path="insights"
+              element={
+                <RequireOnboarding>
+                  <UserInsights />
+                </RequireOnboarding>
+              }
+            />
+            <Route
+              path="messages"
+              element={
+                <RequireOnboarding>
+                  <UserMessages />
+                </RequireOnboarding>
+              }
+            />
+            <Route
+              path="discover"
+              element={
+                <RequireOnboarding>
+                  <UserDiscover />
+                </RequireOnboarding>
+              }
+            />
           </Route>
 
           {/* Company Routes */}
@@ -68,8 +104,9 @@ const App = () => (
           {/* Catch All */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

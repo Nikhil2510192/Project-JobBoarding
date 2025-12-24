@@ -10,10 +10,10 @@ const UserDashboardProfile = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     fullName: "",
-    location: "",
+    headline: "",
+    location: "", // kept for UI only (not sent to backend)
     experience: "",
     skills: "",
-    headline: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,30 +22,49 @@ const UserDashboardProfile = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const isValid =
+    form.fullName.trim() !== "" &&
+    form.headline.trim() !== "" &&
+    form.experience.trim() !== "" &&
+    form.skills.trim() !== "";
+
   const handleNext = async () => {
     if (!isValid) return;
     setLoading(true);
     setError(null);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/user/profile`, {
+      const res = await fetch(`${API_BASE_URL}/user/updateprofile`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
+          // Map strictly to Prisma User model
           name: form.fullName,
-          // map to your backend fields; adjust keys if needed
-          description: form.headline,
-          location: form.location,
-          experience: Number(form.experience) || 0,
-          skills: form.skills,
+          bio: null,
+          description: form.headline || null,
+          experience: Number(form.experience) || null,
+
+          // skills stored as Json array in Prisma
+          skills: form.skills
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
         }),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get("content-type");
+      let data: any = null;
+
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error(`Server returned non-JSON response (${res.status}). Check API URL or auth.`);
+      }
 
       if (!res.ok) {
-        throw new Error(data.message || "Failed to save profile");
+        throw new Error(data?.message || "Failed to save profile");
       }
 
       navigate("/user/dashboard/resume");
@@ -56,8 +75,6 @@ const UserDashboardProfile = () => {
       setLoading(false);
     }
   };
-
-  const isValid = Object.values(form).every((v) => v.trim() !== "");
 
   return (
     <div className="max-w-2xl mx-auto animate-slide-up">
@@ -90,11 +107,7 @@ const UserDashboardProfile = () => {
       </div>
 
       <div className="space-y-6">
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
+        {error && <p className="text-sm text-red-500">{error}</p>}
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">

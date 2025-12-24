@@ -1,28 +1,17 @@
 import  prisma  from '../db.config.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'
-import dotenv from 'dotenv';
-dotenv.config();
+
+
 
 export const createUser = async (req, res) => {
-  try {
-    if (!req.body) {
-      return res.status(400).json({
-        message: "Request body is missing"
-      });
-    }
-
-    const { name, email, password } = req.body;
-
-    console.log("Received data:", { name, email, password });
-
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        message: "All fields are required"
-      });
-    }
-
-    // rest of your existing code stays SAME 👇
+    try{
+  const { name, email, password } = req.body;
+  console.log("Received data:", {name, email, password });
+  if (!name || !email || !password) {
+            console.log("Validation failed: Missing required fields.");
+            return res.status(400).send({ "message": "All Fields are required" });
+        }
   const findUser = await prisma.user.findUnique({
     where: {
       email: email,
@@ -30,11 +19,11 @@ export const createUser = async (req, res) => {
   });
 
   if (findUser) {
-      console.log("Email already taken:", email);
-      return res.status(400).json({
-          status: 400,
-          message: "Email already taken, please use another email."
-      });
+    console.log("Email already taken:", email);
+    return res.json({
+      status: 400,
+      message: "Email Already Taken . please another email.",
+    });
   }
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -50,12 +39,11 @@ const token = jwt.sign(
         process.env.JWT_SECRET, 
         { expiresIn: "7d" }
         );
-res.cookie('token', token, {
-            httpOnly: process.env.NODE_ENV === 'production',
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000  // 7 days
-        });
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+});
  console.log("User created successfully:", newUser);
  return res.json({ status: 200, msg: "User created." });
 }
@@ -63,7 +51,7 @@ res.cookie('token', token, {
     console.error("Error creating user:", error);
     return res.status(500).json({ status: 500, message: "Internal Server Error" });
 }}
-
+//completed
 
 
 
@@ -107,12 +95,11 @@ try {
   { expiresIn: "7d" }
    );
 
-        res.cookie('token', token, {
-            httpOnly: process.env.NODE_ENV === 'production',
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        });
+        res.cookie("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+});
     console.log('user signed in');
     res.json({ message: 'Login Successfull' });
   } catch (err) {
@@ -135,7 +122,7 @@ try {
         }
 
         res.clearCookie('token', {
-            httpOnly: process.env.NODE_ENV === 'production',
+            httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
         });
@@ -307,7 +294,7 @@ export const getAppliedJobs = async (req, res) => {
         id: true,
         role: true,
         salary: true,
-        deadline: true,   // added
+        deadLine: true,   // added
         company: { select: { id: true, name: true } }
       }
     }
@@ -320,7 +307,7 @@ export const getAppliedJobs = async (req, res) => {
   jobId: job.id,
   role: job.role,
   salary: job.salary,
-  deadline: job.deadline,
+  deadLine: job.deadline,
   company: job.company
 }));
     return res.status(200).json({
@@ -398,3 +385,11 @@ export const getDiscoverJobs = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+
+
+

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, X, LogOut } from "lucide-react";
 import Logo from "./Logo";
 import Button from "./Button";
+import { useAuth } from "@/context/AuthContext";
 
 interface NavLink {
   name: string;
@@ -12,6 +13,8 @@ interface NavLink {
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,10 +25,15 @@ const Navbar: React.FC = () => {
   }, []);
 
   const navLinks: NavLink[] = [
-    { name: "Discover", href: "#discover" },
+    { name: "Discover", href: "/user/discover" },
     { name: "For Job Seekers", href: "/signup/user" },
     { name: "For Companies", href: "/signup/company" },
   ];
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   return (
     <nav
@@ -53,14 +61,27 @@ const Navbar: React.FC = () => {
             ))}
           </div>
 
-          {/* Auth Buttons */}
+          {/* Auth / User Section */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/login">
-              <Button variant="ghost">Log In</Button>
-            </Link>
-            <Link to="/signup">
-              <Button variant="primary">Sign Up</Button>
-            </Link>
+            {user ? (
+              <>
+                <span className="text-sm font-medium text-gray-700">
+                  {user.name}
+                </span>
+                <Button variant="ghost" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4 mr-1" /> Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost">Log In</Button>
+                </Link>
+                <Link to="/signup">
+                  <Button variant="primary">Sign Up</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -85,17 +106,38 @@ const Navbar: React.FC = () => {
                 {link.name}
               </Link>
             ))}
+
             <div className="flex flex-col space-y-2 pt-4 border-t">
-              <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="ghost" fullWidth>
-                  Log In
-                </Button>
-              </Link>
-              <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="primary" fullWidth>
-                  Sign Up
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  <span className="text-sm font-medium text-gray-700 px-1">
+                    {user.name}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    fullWidth
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="ghost" fullWidth>
+                      Log In
+                    </Button>
+                  </Link>
+                  <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="primary" fullWidth>
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -25,7 +25,6 @@ export const createJob = async (req, res) => {
 
     // Basic validation
     if (
-      job_id === undefined ||
       salary === undefined ||
       !role ||
       skills === undefined ||
@@ -47,7 +46,6 @@ export const createJob = async (req, res) => {
 
     const newJob = await prisma.job.create({
       data: {
-        job_id: Number(job_id),
         salary: Number(salary),
         role,
         skills,                 // or skills: parsedSkills
@@ -253,7 +251,8 @@ export const shortlistUserForJob = async (req, res) => {
 export const rejectAppliedUser = async (req, res) => {
   try {
     const jobId = Number(req.params.jobId);
-    const candidateId = Number(req.params.userId); // candidate being rejected
+    const { userId } = req.body;
+    const candidateId = Number(userId);// candidate being rejected
     const companyId = Number(req.user.id);         // logged-in company
 
     if (Number.isNaN(jobId) || Number.isNaN(candidateId)) {

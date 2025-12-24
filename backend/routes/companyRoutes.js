@@ -14,21 +14,21 @@ const router = express.Router();
 
 // PUBLIC ROUTES (No authentication required)
 // Create / register company
-router.post('/register', createCompany);
+router.post('/register', createCompany);  //tested
 
 // Login company
-router.post('/login', loginCompany);
+router.post('/login', loginCompany);  //tested
 
 // PROTECTED ROUTES (Authentication required)
 // Get  company details
-router.get('/getcompany', authenticate, getCompany);
+router.get('/getcompany', authenticate, getCompany); //tested
 
 // Update company profile
-router.patch('/updateprofile', authenticate, UpdateCompanyProfile); 
+router.patch('/updateprofile', authenticate, UpdateCompanyProfile);  //tested
 
 // Get recommended users for a specific job
-// Note: jobId passed as URL parameter
 router.get('/recommended-users/:jobId', authenticate, getRecommendedUsersForJob);
+
 // Get jobs posted by the company
 router.get('/getJobs', authenticate, getCompanyJobs);
 
