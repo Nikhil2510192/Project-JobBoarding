@@ -14,7 +14,10 @@ export const Signature = (req, res) => {
     const paramsToSign = {
       timestamp,
       folder: "resume",
+<<<<<<< HEAD
       resource_type: "raw",
+=======
+>>>>>>> frontendv1
     };
 
     const signature = cloudinary.utils.api_sign_request(
@@ -28,7 +31,10 @@ export const Signature = (req, res) => {
       timestamp,
       signature,
       folder: "resume",
+<<<<<<< HEAD
       resourceType: "raw",
+=======
+>>>>>>> frontendv1
     });
     
   } catch (err) {
@@ -36,6 +42,7 @@ export const Signature = (req, res) => {
     res.status(500).json({ message: "Failed to generate signature" });
   }
 };
+<<<<<<< HEAD
 
 
 
@@ -45,3 +52,5 @@ export const Signature = (req, res) => {
 
 
 
+=======
+>>>>>>> frontendv1
