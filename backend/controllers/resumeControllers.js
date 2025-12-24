@@ -1,6 +1,7 @@
 import  prisma  from '../db.config.js';
 import { v2 as cloudinary } from "cloudinary";
 import { analyzeResumeWithGemini } from "../utils/geminiApi.js";
+import { pdfParser } from '../utils/pdfParser.js';
 
 
 
