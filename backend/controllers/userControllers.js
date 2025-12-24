@@ -39,11 +39,14 @@ const token = jwt.sign(
         process.env.JWT_SECRET, 
         { expiresIn: "7d" }
         );
-res.cookie("token", token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-});
+
+        res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+
  console.log("User created successfully:", newUser);
  return res.json({ status: 200, msg: "User created." });
 }
@@ -96,10 +99,12 @@ try {
    );
 
         res.cookie("token", token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-});
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+
     console.log('user signed in');
     res.json({ message: 'Login Successfull' });
   } catch (err) {
@@ -121,11 +126,11 @@ try {
             return res.status(400).send({ "message": "No cookie is present" });
         }
 
-        res.clearCookie('token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        });
+       res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      });
 
         return res.status(200).send({ "message": "Logout successful" });
     } catch (error) {
@@ -307,7 +312,7 @@ export const getAppliedJobs = async (req, res) => {
   jobId: job.id,
   role: job.role,
   salary: job.salary,
-  deadLine: job.deadline,
+  deadLine: job.deadLine,
   company: job.company
 }));
     return res.status(200).json({
@@ -358,7 +363,7 @@ export const getDiscoverJobs = async (req, res) => {
         id: true,
         role: true,
         salary: true,
-        deadline: true,
+        deadLine: true,
         company: { select: { id: true, name: true } }
       }
     });
@@ -368,7 +373,7 @@ export const getDiscoverJobs = async (req, res) => {
       jobId: job.id,
       role: job.role,
       salary: job.salary,
-      deadline: job.deadline,
+      deadLine: job.deadLine,
       company: job.company
     }));
 
