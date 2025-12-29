@@ -8,15 +8,15 @@ const RequireOnboarding = ({ children }: { children: React.ReactNode }) => {
 
   if (!user) return <Navigate to="/login" replace />;
 
-  if (!user.profileCompleted) {
+  if (user.profileCompleted === false) {
     return <Navigate to="/user/dashboard/profile" replace />;
   }
 
-  if (!user.resumeUploaded) {
+  if (user.resumeUploaded === false) {
     return <Navigate to="/user/dashboard/resume" replace />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export default RequireOnboarding;

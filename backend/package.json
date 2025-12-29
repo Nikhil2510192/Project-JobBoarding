@@ -12,12 +12,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-<<<<<<< HEAD
-    "@prisma/adapter-pg": "^7.1.0",
-    "@prisma/client": "^7.1.0",
-=======
     "@prisma/client": "^6.19.1",
->>>>>>> frontendv1
+    "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.8.0",
     "cookie-parser": "^1.4.7",
@@ -26,13 +22,11 @@
     "express": "^5.1.0",
     "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.11.0",
     "nodemon": "^3.1.11",
+    "pdf-parse": "^2.4.5",
     "pg": "^8.16.3",
-<<<<<<< HEAD
-    "prisma": "^7.1.0",
-=======
     "prisma": "^6.19.1",
->>>>>>> frontendv1
     "socket.io": "^4.8.1"
   }
 }

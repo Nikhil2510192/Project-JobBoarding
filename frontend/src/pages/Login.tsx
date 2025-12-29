@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Logo from "@/components/common/Logo";
+import { useAuth } from "@/context/AuthContext"; 
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 const Login = () => {
   const navigate = useNavigate();
+  const { setUser } = useAuth(); // Access context to update state
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -50,8 +52,15 @@ const Login = () => {
       }
 
       if (userType === "user") {
-        // Always start user onboarding after login
-        navigate("/user/dashboard/profile");
+        // Update context immediately so the app knows we are logged in
+        if (data.user) {
+           setUser(data.user);
+           localStorage.setItem("user", JSON.stringify(data.user));
+        }
+
+        // Navigate to HOME, not profile. 
+        // RequireOnboarding in App.tsx will redirect to profile/resume ONLY if needed.
+        navigate("/user/home"); 
       } else {
         navigate("/company/dashboard");
       }

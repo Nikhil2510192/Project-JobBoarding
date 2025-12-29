@@ -54,9 +54,17 @@ const UserHome = () => {
         });
 
         // 2) Applied jobs (statuses)
-        const jobsRes = await fetch(`${API_BASE_URL}/job/GetAppliedJobs`, {
+        // ✅ FIX: Changed from /job/applied-jobs to /user/applied-jobs
+        const jobsRes = await fetch(`${API_BASE_URL}/user/applied-jobs`, {
           credentials: "include",
         });
+        
+        // Check for non-JSON response (404/500 HTML pages)
+        const contentType = jobsRes.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+           throw new Error("Received invalid response from server (Endpoint might be wrong)");
+        }
+
         const jobsData = await jobsRes.json();
         if (!jobsRes.ok) {
           throw new Error(jobsData.message || "Failed to load jobs");
@@ -68,7 +76,7 @@ const UserHome = () => {
             return {
               id: job.id,
               title: job.role || job.title || "Job title",
-              company: job.companyName || job.company || "Company",
+              company: job.companyName || job.company?.name || "Company", // Added safe check for company name
               location: job.location || "Not specified",
               salary: job.salary ? `₹${job.salary}` : undefined,
               type: job.type || "Full-time",

@@ -1,6 +1,9 @@
 import axios from "axios";
-import pdfParse from "pdf-parse";
 import mammoth from "mammoth";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
 
 // Download file from URL and return as buffer
 async function downloadFile(url) {
@@ -34,13 +37,11 @@ export async function pdfParser(fileUrl) {
 
     // 2️⃣ Determine file type
     if (lowerUrl.endsWith(".pdf")) {
-      const text = await extractPdf(fileBuffer);
-      return text.trim();
+      return (await extractPdf(fileBuffer)).trim();
     }
 
     if (lowerUrl.endsWith(".docx")) {
-      const text = await extractDocx(fileBuffer);
-      return text.trim();
+      return (await extractDocx(fileBuffer)).trim();
     }
 
     throw new Error("Unsupported file type. Only PDF and DOCX allowed.");

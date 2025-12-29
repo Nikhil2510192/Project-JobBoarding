@@ -1,39 +1,29 @@
 // index.js (Integrated Express and Socket.IO Server)
 
-<<<<<<< HEAD
-import { app } from "./Middlewares/app.js";
-=======
 import app from "./Middlewares/app.js";
->>>>>>> frontendv1
 import dotenv from "dotenv";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 
-<<<<<<< HEAD
-=======
 // ⭐ ADDED — to fetch saved notifications
 import  prisma  from './db.config.js';
 
->>>>>>> frontendv1
 dotenv.config();
 
 const PORT = process.env.PORT || 8000;
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> frontendv1
 // 1. Setup Combined HTTP/WS Server
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
-<<<<<<< HEAD
+
         origin: process.env.FRONTEND_URL || "http://localhost:3000",
-=======
+
         origin: process.env.FRONTEND_URL || "http://localhost:8080",
->>>>>>> frontendv1
+
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -52,13 +42,8 @@ io.use((socket, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-<<<<<<< HEAD
-        socket.userId = decoded.userId;
-        socket.userType = decoded.userType || "user";
-=======
         socket.userId = decoded.id;
         socket.userType = decoded.type || "user";
->>>>>>> frontendv1
         next();
     } catch (err) {
         return next(new Error("Auth Error: Invalid token"));
@@ -66,11 +51,7 @@ io.use((socket, next) => {
 });
 
 // 3. WebSocket Connection Handler
-<<<<<<< HEAD
-io.on("connection", (socket) => {
-=======
 io.on("connection", async (socket) => {   // ⭐ CHANGED → made async
->>>>>>> frontendv1
     console.log(`🔌 User ${socket.userId} (${socket.userType}) connected`);
     
     // Store active connection
@@ -83,9 +64,6 @@ io.on("connection", async (socket) => {   // ⭐ CHANGED → made async
     if (socket.userType === "company") {
         socket.join("all_companies");
     }
-<<<<<<< HEAD
-    
-=======
 
     // ⭐⭐⭐ ADDED — Deliver pending notifications (offline → now online)
     try {
@@ -110,7 +88,6 @@ io.on("connection", async (socket) => {   // ⭐ CHANGED → made async
     }
     // ⭐⭐⭐ END OF ADDED BLOCK
 
->>>>>>> frontendv1
     // Disconnection logic
     socket.on("disconnect", () => {
         console.log(`🔌 User ${socket.userId} disconnected`);
@@ -128,8 +105,4 @@ httpServer.listen(PORT, () => {
 });
 
 // Optional: Export for use in other modules
-<<<<<<< HEAD
 export { io, connectedUsers };
-=======
-export { io, connectedUsers };
->>>>>>> frontendv1
