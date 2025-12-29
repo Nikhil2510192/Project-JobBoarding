@@ -19,4 +19,8 @@ router.use("/resume",authenticate,ResumeRoutes);
 // * For CompanyRoutes
 router.use("/company", CompanyRoutes);
 
+<<<<<<< HEAD
 export default router;
+=======
+export default router;
+>>>>>>> frontendv1

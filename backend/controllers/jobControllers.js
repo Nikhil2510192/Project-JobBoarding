@@ -25,6 +25,10 @@ export const createJob = async (req, res) => {
 
     // Basic validation
     if (
+<<<<<<< HEAD
+      job_id === undefined ||
+=======
+>>>>>>> frontendv1
       salary === undefined ||
       !role ||
       skills === undefined ||
@@ -46,6 +50,10 @@ export const createJob = async (req, res) => {
 
     const newJob = await prisma.job.create({
       data: {
+<<<<<<< HEAD
+        job_id: Number(job_id),
+=======
+>>>>>>> frontendv1
         salary: Number(salary),
         role,
         skills,                 // or skills: parsedSkills
@@ -129,6 +137,13 @@ export const applyToJob = async (req, res) => {
 
 
 
+<<<<<<< HEAD
+
+
+
+
+=======
+>>>>>>> frontendv1
 export const shortlistUserForJob = async (req, res) => {
   try {
     const jobId = Number(req.params.jobId);
@@ -150,7 +165,11 @@ export const shortlistUserForJob = async (req, res) => {
       include: {
         usersApplied: { select: { id: true } },
         usersShortlisted: { select: { id: true } },
+<<<<<<< HEAD
+        company: { // Get company info for notification
+=======
         company: {
+>>>>>>> frontendv1
           select: {
             name: true,
             id: true
@@ -167,7 +186,11 @@ export const shortlistUserForJob = async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: { id: userIdNum },
+<<<<<<< HEAD
+      select: { id: true, email: true, name: true }, // Get user details
+=======
       select: { id: true, email: true, name: true },
+>>>>>>> frontendv1
     });
 
     if (!user) {
@@ -203,12 +226,17 @@ export const shortlistUserForJob = async (req, res) => {
       data: updateData,
     });
 
+<<<<<<< HEAD
+    // Send real-time notification to the user
+    notifyUser(userIdNum, "job_status_updated", {
+=======
     // -------------------------
     // CHANGED: obtain io from Express app (no circular import)
     const io = req.app.get("io"); // CHANGED
 
     // Prepare notification payload
     const payload = {
+>>>>>>> frontendv1
       type: "shortlisted",
       jobId: jobId,
       jobTitle: job.role || job.title,
@@ -216,16 +244,24 @@ export const shortlistUserForJob = async (req, res) => {
       message: `Congratulations! You've been shortlisted for the ${job.role} position at ${job.company.name}`,
       timestamp: new Date().toISOString(),
       status: "shortlisted"
+<<<<<<< HEAD
+    });
+=======
     };
 
     // CHANGED: notifyUser is now async and returns { delivered: boolean }
     const notifyResult = await notifyUser(io, userIdNum, "job_status_updated", payload); // CHANGED
+>>>>>>> frontendv1
 
     return res.status(200).json({
       message: hasApplied
         ? "User moved from applied to shortlisted"
         : "User added directly to shortlisted",
+<<<<<<< HEAD
+      notificationSent: true // Optional: confirm notification was sent
+=======
       notificationSent: notifyResult?.delivered ?? false // CHANGED: reflect actual delivery
+>>>>>>> frontendv1
     });
   } catch (error) {
     console.error("Error shortlisting user:", error);
@@ -245,6 +281,12 @@ export const shortlistUserForJob = async (req, res) => {
 
 
 
+<<<<<<< HEAD
+export const rejectAppliedUser = async (req, res) => {
+  try {
+    const jobId = Number(req.params.jobId);
+    const candidateId = Number(req.params.userId); // candidate being rejected
+=======
 
 
 // Existing controller (modified minimally)
@@ -253,6 +295,7 @@ export const rejectAppliedUser = async (req, res) => {
     const jobId = Number(req.params.jobId);
     const { userId } = req.body;
     const candidateId = Number(userId);// candidate being rejected
+>>>>>>> frontendv1
     const companyId = Number(req.user.id);         // logged-in company
 
     if (Number.isNaN(jobId) || Number.isNaN(candidateId)) {
@@ -302,10 +345,14 @@ export const rejectAppliedUser = async (req, res) => {
     });
 
     // ✅ WEB SOCKET NOTIFICATION FOR REJECTION
+<<<<<<< HEAD
+    notifyUser(candidateId, "job_status_updated", {
+=======
     // CHANGED: obtain io from Express app to avoid circular imports
     const io = req.app.get("io"); // CHANGED
 
     const payload = {
+>>>>>>> frontendv1
       type: "rejected",
       jobId: jobId,
       jobTitle: job.role || job.title,
@@ -313,10 +360,14 @@ export const rejectAppliedUser = async (req, res) => {
       message: `Your application for ${job.role} at ${job.company.name} has been reviewed. We appreciate your interest.`,
       timestamp: new Date().toISOString(),
       status: "rejected"
+<<<<<<< HEAD
+    });
+=======
     };
 
     // CHANGED: use async notifyUser(io, ...) and capture result
     const notifyResult = await notifyUser(io, candidateId, "job_status_updated", payload); // CHANGED
+>>>>>>> frontendv1
 
     // Get updated job data for response
     const updatedJob = await prisma.job.findUnique({
@@ -333,7 +384,11 @@ export const rejectAppliedUser = async (req, res) => {
 
     return res.status(200).json({
       message: "User rejected and removed from applied list",
+<<<<<<< HEAD
+      notificationSent: true, // Confirm WebSocket was sent
+=======
       notificationSent: notifyResult?.delivered ?? false, // CHANGED: reflect actual delivery
+>>>>>>> frontendv1
       appliedUsers: updatedJob.usersApplied,
       shortlistedUsers: updatedJob.usersShortlisted,
     });
@@ -355,6 +410,12 @@ export const rejectAppliedUser = async (req, res) => {
 
 
 
+<<<<<<< HEAD
+
+
+
+=======
+>>>>>>> frontendv1
 export const getAppliedUsers = async (req, res) => {
   try {
     const jobId = Number(req.params.jobId);
