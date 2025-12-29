@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import RequireOnboarding from "@/components/RequireOnboarding";
 import OnboardingLayout from "@/components/layouts/OnboardingLayout";
 
@@ -32,8 +32,27 @@ import CompanyCandidates from "./pages/company/CompanyCandidates";
 import CompanySettings from "./pages/company/CompanySettings";
 
 import NotFound from "./pages/NotFound";
+import { useAuth } from "@/context/AuthContext";
 
 const queryClient = new QueryClient();
+
+const PublicHome = () => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return user ? <Navigate to="/user/home" replace /> : <Welcome />;
+};
+
+const UserGate = () => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return user ? <UserLayout /> : <Navigate to="/" replace />;
+};
+
+const CompanyGate = () => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return user ? <CompanyLayout /> : <Navigate to="/" replace />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -44,7 +63,7 @@ const App = () => (
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Welcome />} />
+          <Route path="/" element={<PublicHome />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signup/user" element={<UserSignup />} />
           <Route path="/signup/company" element={<CompanySignup />} />
@@ -57,7 +76,7 @@ const App = () => (
           </Route>
 
           {/* User Protected Routes */}
-          <Route path="/user" element={<UserLayout />}>
+          <Route path="/user" element={<UserGate />}>
             <Route
               path="home"
               element={
@@ -93,7 +112,7 @@ const App = () => (
           </Route>
 
           {/* Company Routes */}
-          <Route path="/company" element={<CompanyLayout />}>
+          <Route path="/company" element={<CompanyGate />}>
             <Route path="dashboard" element={<CompanyDashboard />} />
             <Route path="job/:id" element={<CompanyJobDetails />} />
             <Route path="jobs" element={<CompanyJobs />} />

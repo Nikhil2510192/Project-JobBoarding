@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Logo from "@/components/common/Logo";
+import { useAuth } from "@/context/AuthContext"; //
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 const UserSignup = () => {
   const navigate = useNavigate();
+  const { setUser } = useAuth(); // Get setUser to update context
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -31,8 +33,7 @@ const UserSignup = () => {
       const res = await fetch(`${API_BASE_URL}/user/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
-
+        credentials: "include", // Important for cookies
         body: JSON.stringify({
           name: form.fullName,
           email: form.email,
@@ -46,7 +47,18 @@ const UserSignup = () => {
         throw new Error(data.message || "Failed to sign up");
       }
 
-      // On success: backend sets cookie, then go to profile step
+      // ✅ FIX: Manually log the user in locally so they aren't redirected to Welcome
+      // We construct a basic user object since the register API might not return the full user
+      const newUser = {
+        name: form.fullName,
+        profileCompleted: false, 
+        resumeUploaded: false
+      };
+      
+      setUser(newUser);
+      localStorage.setItem("user", JSON.stringify(newUser));
+
+      // Navigate to profile setup
       navigate("/user/dashboard/profile");
     } catch (err: any) {
       console.error(err);
@@ -63,102 +75,48 @@ const UserSignup = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Navbar */}
       <nav className="border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2"
-          >
+          <button onClick={() => navigate("/")} className="flex items-center gap-2">
             <div className="flex items-center cursor-default">
               <Logo />
             </div>
           </button>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">
-              Already have an account?
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/login")}
-            >
-              Log In
-            </Button>
+            <span className="text-sm text-muted-foreground">Already have an account?</span>
+            <Button variant="outline" size="sm" onClick={() => navigate("/login")}>Log In</Button>
           </div>
         </div>
       </nav>
 
-      {/* Content */}
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md animate-slide-up">
           <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Create your account
-            </h1>
-            <p className="text-muted-foreground">
-              Start your job search journey
-            </p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Create your account</h1>
+            <p className="text-muted-foreground">Start your job search journey</p>
           </div>
 
           {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Full Name
-              </label>
-              <Input
-                name="fullName"
-                value={form.fullName}
-                onChange={handleChange}
-                placeholder="Enter your full name"
-              />
+              <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
+              <Input name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter your full name" />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Email
-              </label>
-              <Input
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="Enter your email"
-              />
+              <label className="block text-sm font-medium text-foreground mb-2">Email</label>
+              <Input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Enter your email" />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Password
-              </label>
-              <Input
-                name="password"
-                type="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-              />
+              <label className="block text-sm font-medium text-foreground mb-2">Password</label>
+              <Input name="password" type="password" value={form.password} onChange={handleChange} placeholder="••••••••" />
             </div>
-
-            <Button
-              type="submit"
-              className="w-full mt-6"
-              size="lg"
-              disabled={!isValid || loading}
-            >
+            <Button type="submit" className="w-full mt-6" size="lg" disabled={!isValid || loading}>
               {loading ? "Creating..." : "Create Account"}
             </Button>
           </form>
-
           <div className="mt-6 text-center">
-            <button
-              onClick={() => navigate("/signup")}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              ← Back to options
-            </button>
+            <button onClick={() => navigate("/signup")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">← Back to options</button>
           </div>
         </div>
       </main>

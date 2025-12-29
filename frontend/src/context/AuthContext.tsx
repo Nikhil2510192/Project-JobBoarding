@@ -1,7 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+
 export type User = {
   name: string;
+  email?: string;
+  role?: string;
+  // Critical flags for onboarding
   profileCompleted?: boolean;
   resumeUploaded?: boolean;
 };
@@ -16,16 +21,57 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem("user");
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: later load user from API / cookie
-    setLoading(false);
+    const loadUser = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/user/getuser`, {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          // Token is invalid/expired
+          setUser(null);
+          localStorage.removeItem("user");
+        } else {
+          const data = await res.json();
+          setUser(data.user);
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
+      } catch {
+        setUser(null);
+        localStorage.removeItem("user");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUser();
   }, []);
 
   const logout = async () => {
+    // 1. Clear local state IMMEDIATELY (Optimistic UI)
     setUser(null);
+    localStorage.removeItem("user");
+
+    // 2. Clear server cookie
+    try {
+      await fetch(`${API_BASE_URL}/user/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Logout API failed", error);
+    }
   };
 
   return (

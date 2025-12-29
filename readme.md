@@ -26,6 +26,18 @@ A backend service powering a job portal where users can register, upload resumes
 - Apply, shortlist, and search job functionality
 - Prisma database with full relational modeling
 
----
+
+prisma orm
+postgressql
+expess.js
+jwt tokens
+bycrypt
+cloudinary
+gemini api
+websockets
+
+
+
+
 
 

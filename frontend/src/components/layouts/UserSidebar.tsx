@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   User,
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/common/Logo";
+import { useAuth } from "@/context/AuthContext"; // Import Auth Hook
 
 const menuItems = [
   { icon: Home, label: "Home", path: "/user/home" },
@@ -22,6 +23,13 @@ const menuItems = [
 
 export const UserSidebar = () => {
   const location = useLocation();
+  const { logout } = useAuth(); // Get logout function
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login"); // Force navigation to login/welcome
+  };
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-background border-r border-border">
@@ -55,15 +63,15 @@ export const UserSidebar = () => {
           })}
         </nav>
 
-        {/* Logout */}
+        {/* Logout - CHANGED TO BUTTON */}
         <div className="border-t border-border p-3">
-          <NavLink
-            to="/"
-            className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground"
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground"
           >
             <LogOut className="h-4 w-4" />
             Logout
-          </NavLink>
+          </button>
         </div>
       </div>
     </aside>
